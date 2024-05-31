@@ -222,17 +222,17 @@ const Index = () => {
                 <Image source={{ uri: media.uri }} style={styles.image} />
               )}
               {/* You can add a video preview here if needed */}
-              {/* Add Title input */}
-              <Text>标题</Text>
               <TextInput
+                label="标题"
                 placeholder="标题"
                 value={title}
                 onChangeText={setTitle}
                 style={styles.input}
               />
               {/* Add Description input */}
-              <Text>描述</Text>
+
               <TextInput
+                label="描述"
                 placeholder="描述"
                 value={description}
                 onChangeText={setDescription}
