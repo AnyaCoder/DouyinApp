@@ -18,17 +18,40 @@ import RotateAvatar from "../avatar/RotateAvatar";
 
 import OpenCommentContext from "../../context/OpenCommentContext";
 
-const VideoPlay = ({
-  paused,
-  videoID,
-  uri,
-  original_likes,
-  views,
-  commentsNum,
-}) => {
+const VideoPlay = ({ paused, videoItem, commentsNum }) => {
   const openComment = React.useContext(OpenCommentContext);
-  // 赞的数量
-  const [likes, setLikes] = useState(original_likes);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [videoID, setVideoID] = useState(videoItem.videoID);
+  const [views, setViews] = useState(videoItem.views);
+  const [likes, setLikes] = useState(videoItem.likes);
+  const [uri, setUri] = useState(
+    `http://10.0.2.2:3001/UploadedVideos/${videoItem.videoPath}`
+  );
+
+  const handleFollowToggle = async (userId, followedUserId) => {
+    const url = "http://10.0.2.2:3001/api/follows";
+    const options = {
+      method: isFollowing ? "DELETE" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, followedUserId }),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) {
+        setIsFollowing(!isFollowing);
+        console.log(
+          `Successfully ${isFollowing ? "unfollowed" : "followed"} the user!`
+        );
+      } else {
+        console.error("Failed to follow/unfollow the user");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   return (
     <View style={{ flex: 1, bottom: 16 }}>
@@ -57,11 +80,8 @@ const VideoPlay = ({
         <View style={styles.btnItem}>
           <IconTextButton
             name="people"
-            text="+关注"
-            onPress={() => {
-              // 关注
-              console.log("你已经成功关注他/她！");
-            }}
+            text={isFollowing ? "已关注" : "+关注"}
+            onPress={() => handleFollowToggle(1, 2)}
           />
         </View>
         <View style={styles.btnItem}>

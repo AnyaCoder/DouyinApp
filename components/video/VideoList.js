@@ -39,10 +39,7 @@ const VideoList = ({ setVideoInfo, commentsNum }) => {
         <View style={{ height: height, top: 16 }}>
           <VideoPlay
             paused={index !== current}
-            uri={`http://10.0.2.2:3001/UploadedVideos/${item.videoPath}`}
-            videoID={item.videoID}
-            views={item.views}
-            original_likes={item.likes}
+            videoItem={item}
             commentsNum={commentsNum}
           />
         </View>
