@@ -191,7 +191,7 @@ const Me = () => {
           <ImageBackground
             style={styles.background}
             source={{
-              uri: "https://pica.zhimg.com/80/v2-2a04aebe8ea49cead4228f826dec589c_1440w.webp",
+              uri: "https://c-ssl.duitang.com/uploads/blog/202203/07/20220307144348_fdfea.jpg",
             }}
           >
             <TouchableOpacity
@@ -223,7 +223,7 @@ const Me = () => {
             <Avatar
               border={5}
               size="big"
-              uri="https://portrait.gitee.com/uploads/avatars/user/1593/4779677_King-XiYu_1578974235.png!avatar100"
+              uri="https://c-ssl.duitang.com/uploads/blog/202203/07/20220307144348_fdfea.jpg"
             />
           </View>
           <View

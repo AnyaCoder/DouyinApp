@@ -1,85 +1,136 @@
-import React, { useEffect } from 'react'
-import { StyleSheet, Text, View, Animated } from 'react-native';
-import IconButton from '../button/IconButton'
+import React, { useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Animated,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import IconButton from "../button/IconButton";
 
-const Panel = ({ children, open, onClose }) => {
-    // 定义框的高度
-    const [panelHeight] = React.useState(new Animated.Value(0))
-    // 打开这个面板的方法
-    const openPanel = React.useCallback(() => {
-        Animated.timing(panelHeight, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: false,
-        }).start();
-    }, [panelHeight])
+const Panel = ({ children, open, onClose, commentsNum, handleSend }) => {
+  const [panelHeight] = React.useState(new Animated.Value(0));
+  const [inputText, setInputText] = React.useState("");
 
-    // 当 open 属性改变并且改变为 true 时才调用
-    React.useEffect(() => {
-        if (open) {
-            openPanel();
-        }
-    }, [openPanel, open])
+  const openPanel = React.useCallback(() => {
+    Animated.timing(panelHeight, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [panelHeight]);
 
-    return (
-        <Animated.View style={[styles.panel, {
-            height: panelHeight.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '50%'],
-            })
-        }]}>
-            {/* 关闭按钮 */}
-            <View style={styles.panelHeader}>
-                <Text style={styles.panelText}>1234条</Text>
-                <IconButton
-                    name="close"
-                    color="white"
-                    size={25}
-                    onPress={() => {
-                        Animated.timing(panelHeight, {
-                            toValue: 0,
-                            duration: 200,
-                            useNativeDriver: false,
-                        }).start(() => {
-                            // 关闭动画执行完之后 触发组件的 onClose
-                            onClose();
-                        });
-                    }}
-                />
-            </View>
-            {/* 内容 */}
-            {children}
-        </Animated.View>
-    )
-}
+  useEffect(() => {
+    if (open) {
+      openPanel();
+    }
+  }, [openPanel, open]);
 
-// open 属性默认是 false （关闭的）
+  return (
+    <Animated.View
+      style={[
+        styles.panel,
+        {
+          height: panelHeight.interpolate({
+            inputRange: [0, 1],
+            outputRange: ["0%", "60%"],
+          }),
+        },
+      ]}
+    >
+      <View style={styles.panelHeader}>
+        <Text style={styles.panelText}>{commentsNum}条评论</Text>
+        <IconButton
+          name="close"
+          color="white"
+          size={25}
+          onPress={() => {
+            Animated.timing(panelHeight, {
+              toValue: 0,
+              duration: 200,
+              useNativeDriver: false,
+            }).start(() => {
+              onClose();
+            });
+          }}
+        />
+      </View>
+      <View style={styles.panelContent}>{children}</View>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="请说点什么吧"
+          placeholderTextColor="#999"
+          value={inputText}
+          onChangeText={setInputText}
+        />
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={() => {
+            handleSend(inputText);
+            setInputText("");
+          }}
+        >
+          <Text style={styles.sendButtonText}>发送</Text>
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
+  );
+};
+
 Panel.defaultProps = {
-    open: false,
-}
+  open: false,
+};
 
-export default Panel
+export default Panel;
 
 const styles = StyleSheet.create({
-    panel: {
-        position: 'absolute',
-        left: 0,
-        bottom: 0,
-        width: '100%',
-        height: '85%',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
-    },
-    panelHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-    },
-    panelText: {
-        color: 'white',
-        alignItems: 'center',
-        flex: 1,
-        textAlign: 'center',
-    }
-})
+  panel: {
+    position: "absolute",
+    left: 0,
+    bottom: 0,
+    width: "100%",
+    backgroundColor: "rgba(0,0,0,0.8)",
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+  },
+  panelHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+  },
+  panelText: {
+    color: "white",
+    flex: 1,
+    textAlign: "center",
+  },
+  panelContent: {
+    flex: 1,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#444",
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    padding: 10,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  sendButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "#1E90FF",
+    borderRadius: 20,
+  },
+  sendButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+});
