@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect, memo } from "react";
+// pages/me/Me.js
+import React, { useRef, useState, useEffect, useContext, memo } from "react";
 import {
   StyleSheet,
   Text,
@@ -27,12 +28,14 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 
 // 引入 context
 import OpenDrawerContext from "../../../context/OpenDrawerContext";
+import { UserContext } from "../../../context/UserContext";
 
 // 模拟的数据
 const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 const Me = () => {
   const openDrawer = React.useContext(OpenDrawerContext);
+  const { user } = useContext(UserContext);
 
   // 滑动框的引用
   const viewRef = useRef();
@@ -55,22 +58,36 @@ const Me = () => {
   const [videoPath, setVideoPath] = useState("");
   const [thumbnailPath, setThumbnailPath] = useState("");
 
+  const [userStats, setUserStats] = useState({});
+
   const getData = async () => {
     try {
-      const response = await fetch("http://10.0.2.2:3001/api/videos/1", {
-        method: "GET",
-        body: null,
-      });
+      const resp_userVideos = await fetch(
+        `http://10.0.2.2:3001/api/videos/${user.userID}`,
+        {
+          method: "GET",
+          body: null,
+        }
+      );
       // Check if the response is successful
 
-      const jsonData = await response.json();
-      const dataArray = Array.isArray(jsonData) ? jsonData : [];
-      console.log("dataArray: ", dataArray);
+      const userVideosData = await resp_userVideos.json();
+      const dataArray = Array.isArray(userVideosData) ? userVideosData : [];
       const mappedRows = dataArray.map((item, index) => ({
         id: item.userID,
         ...item,
       }));
       setData(mappedRows); // 确保为数组类型
+
+      const resp_userStats = await fetch(
+        `http://10.0.2.2:3001/api/users/stats/${user.userID}`,
+        {
+          method: "GET",
+          body: null,
+        }
+      );
+      const statsData = await resp_userStats.json();
+      setUserStats(statsData);
     } catch (error) {
       console.error("Error fetching data:", error);
       setData([]); // 在出错时设置一个空数组
@@ -131,7 +148,7 @@ const Me = () => {
         }
       );
       console.log(
-        `Deleted Video (ID: ${videoID}), response: ${response.json()}`
+        `Updated Video (ID: ${videoID}), response: ${response.json()}`
       );
     } catch (error) {
       console.error("Error handleUpdate:", error);
@@ -234,10 +251,10 @@ const Me = () => {
             }}
           >
             <Text style={{ color: "white", fontSize: 25, fontWeight: "bold" }}>
-              蚌埠居士
+              {user.username}
             </Text>
             <Text style={{ color: "white", marginTop: 5 }}>
-              抖音号：15201090000
+              抖音号：{user.userID}
             </Text>
           </View>
         </View>
@@ -275,10 +292,10 @@ const Me = () => {
             }}
           >
             <View style={{ flexDirection: "row" }}>
-              <NumText number="11" text="获赞" />
-              <NumText number="45" text="朋友" />
-              <NumText number="14" text="关注" />
-              <NumText number="66" text="粉丝" />
+              <NumText number={userStats.likes} text="获赞" />
+              <NumText number={userStats.friends} text="朋友" />
+              <NumText number={userStats.following} text="关注" />
+              <NumText number={userStats.followers} text="粉丝" />
             </View>
             <View>
               <TextButton
@@ -373,7 +390,7 @@ const Me = () => {
   );
 };
 
-const CustomImageBackground = memo(({ uri, views }) => (
+const CustomImageBackground = memo(({ uri, likes, views }) => (
   <ImageBackground
     style={{
       flex: 1,
@@ -382,8 +399,16 @@ const CustomImageBackground = memo(({ uri, views }) => (
     }}
     source={{ uri }}
   >
-    <View style={{ position: "absolute", bottom: 0, left: 10 }}>
+    <View
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 10,
+        justifyContent: "flex-start",
+      }}
+    >
       <GoodsItem color="white" icon="airplay" title={views} />
+      <GoodsItem color="red" icon="favorite" title={likes} />
     </View>
   </ImageBackground>
 ));
@@ -396,6 +421,7 @@ const MyViewPager = ({ data, viewRef, setActiveIndex, showDialog }) => {
       <CustomImageBackground
         uri={`${thumbnailUrl}/${item.thumbnailPath}`}
         views={item.views}
+        likes={item.likes}
       />
       <TouchableOpacity
         style={styles.overlay}

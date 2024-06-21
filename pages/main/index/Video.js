@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import {
   StyleSheet,
@@ -17,6 +17,7 @@ import CommentItem from "../../../components/comment/CommentItem";
 import Panel from "../../../components/comment/Panel";
 
 import OpenCommentContext from "../../../context/OpenCommentContext";
+import { UserContext } from "../../../context/UserContext";
 import { fetchData } from "../../../components/video/utils";
 // 创建一个 ref
 const viewPageRef = React.createRef();
@@ -24,7 +25,7 @@ const viewPageRef = React.createRef();
 const Video = () => {
   // 白线左边的位置
   const [lineLeft, setLineLeft] = React.useState(new Animated.Value(0));
-
+  const { user } = useContext(UserContext);
   // 评论框是否打开
   const [openComment, setOpenComment] = React.useState(false);
 
@@ -41,11 +42,6 @@ const Video = () => {
     setComments(result);
   };
 
-  useEffect(() => {
-    // 初始化评论
-    getComments(`5`);
-  }, []);
-
   // 更新, 钩子函数， 随着videoInfo变化而改变
   useEffect(() => {
     console.log(`videoInfo: `, videoInfo);
@@ -61,7 +57,7 @@ const Video = () => {
     const result = await fetch(url, {
       method: "POST",
       body: JSON.stringify({
-        userID: 1,
+        userID: user.userID,
         videoID: videoInfo.videoID,
         content: inputText,
       }),
@@ -145,7 +141,7 @@ const Video = () => {
                   paddingRight: "5%",
                 },
               ]}
-              title="关注"
+              title="推荐"
               onPress={() => {
                 // 切换屏幕内容
                 viewPageRef.current.setPage(0);
@@ -159,7 +155,7 @@ const Video = () => {
             />
             <TextButton
               style={styles.textBtnLabel}
-              title="推荐"
+              title="关注"
               onPress={() => {
                 // 切换屏幕内容
                 viewPageRef.current.setPage(1);

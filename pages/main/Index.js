@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   Button,
   Image,
@@ -14,7 +14,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import * as ImagePicker from "expo-image-picker";
 import { Provider as PaperProvider, Dialog, Portal } from "react-native-paper";
 import * as FileSystem from "expo-file-system";
-
+import { UserContext } from "../../context/UserContext";
 // 创建底部导航器
 const IndexBottomTabNavigator = createBottomTabNavigator();
 // 导入四个页面
@@ -24,9 +24,10 @@ import MessagePage from "./message/Index";
 import MePage from "./me/Index";
 
 const Index = () => {
+  const { user } = useContext(UserContext);
+
   const [media, setMedia] = useState(null);
   const [visible, setVisible] = useState(false);
-  const [userID, setUserID] = useState(1);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -97,7 +98,7 @@ const Index = () => {
   };
 
   const handleUpload = () => {
-    uploadMedia(userID, title, description);
+    uploadMedia(user.userID, title, description);
     setVisible(false);
   };
 

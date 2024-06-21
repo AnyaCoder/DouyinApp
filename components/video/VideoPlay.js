@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { ResizeMode } from "expo-av";
 import VideoPlayer from "expo-video-player";
-import { fetchData } from "./utils";
+import { postData } from "./utils";
 // 引入组件
 import Avatar from "../avatar/Avatar";
 import HeartBtn from "../button/HeartBtn";
@@ -17,18 +17,23 @@ import IconTextButton from "../button/IconTextButton";
 import RotateAvatar from "../avatar/RotateAvatar";
 
 import OpenCommentContext from "../../context/OpenCommentContext";
+import { UserContext } from "../../context/UserContext";
 
 const VideoPlay = ({ paused, videoItem, commentsNum }) => {
   const openComment = React.useContext(OpenCommentContext);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [videoID, setVideoID] = useState(videoItem.videoID);
-  const [views, setViews] = useState(videoItem.views);
   const [likes, setLikes] = useState(videoItem.likes);
   const [uri, setUri] = useState(
     `http://10.0.2.2:3001/UploadedVideos/${videoItem.videoPath}`
   );
+  const { user } = useContext(UserContext);
 
-  const handleFollowToggle = async (userId, followedUserId) => {
+  useEffect(() => {
+    const view_url = `http://10.0.2.2:3001/api/videos/${videoItem.videoID}/view`;
+    postData(view_url, {});
+  }, []);
+
+  const handleFollowToggle = async ({ userId, followedUserId }) => {
     const url = "http://10.0.2.2:3001/api/follows";
     const options = {
       method: isFollowing ? "DELETE" : "POST",
@@ -43,7 +48,9 @@ const VideoPlay = ({ paused, videoItem, commentsNum }) => {
       if (response.ok) {
         setIsFollowing(!isFollowing);
         console.log(
-          `Successfully ${isFollowing ? "unfollowed" : "followed"} the user!`
+          `${userId} Successfully ${
+            isFollowing ? "unfollowed" : "followed"
+          } the user ${followedUserId}!`
         );
       } else {
         console.error("Failed to follow/unfollow the user");
@@ -72,6 +79,12 @@ const VideoPlay = ({ paused, videoItem, commentsNum }) => {
         }}
         style={styles.video}
       />
+      {/* 左下角标题和描述 */}
+      <View style={styles.textContainer}>
+        <Text style={styles.title}>@{videoItem.username}</Text>
+        <Text style={styles.title}>{videoItem.title}</Text>
+        <Text style={styles.description}>{videoItem.description}</Text>
+      </View>
       {/* 图标按钮 */}
       <View style={styles.btns}>
         <View style={styles.btnItem}>
@@ -81,11 +94,20 @@ const VideoPlay = ({ paused, videoItem, commentsNum }) => {
           <IconTextButton
             name="people"
             text={isFollowing ? "已关注" : "+关注"}
-            onPress={() => handleFollowToggle(1, 2)}
+            onPress={() =>
+              handleFollowToggle({
+                userId: user.userID,
+                followedUserId: videoItem.userID,
+              })
+            }
           />
         </View>
         <View style={styles.btnItem}>
-          <HeartBtn number={likes} videoID={videoID} setLikes={setLikes} />
+          <HeartBtn
+            number={likes}
+            videoID={videoItem.videoID}
+            setLikes={setLikes}
+          />
         </View>
         <View style={styles.btnItem}>
           <IconTextButton
@@ -98,7 +120,7 @@ const VideoPlay = ({ paused, videoItem, commentsNum }) => {
           />
         </View>
         <View style={styles.btnItem}>
-          <IconTextButton name="share" text={views} />
+          <IconTextButton name="share" text={videoItem.views} />
         </View>
         <View style={styles.btnItem}>
           <RotateAvatar
@@ -121,6 +143,24 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     right: 0,
+  },
+  textContainer: {
+    position: "absolute",
+    left: 16,
+    bottom: 100,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 10,
+    borderRadius: 8,
+  },
+  title: {
+    color: "white",
+    fontSize: 25,
+    fontWeight: "bold",
+  },
+  description: {
+    color: "white",
+    fontSize: 20,
+    marginTop: 4,
   },
   btns: {
     position: "absolute",
