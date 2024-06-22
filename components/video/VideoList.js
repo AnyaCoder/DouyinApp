@@ -8,7 +8,7 @@ const { height } = Dimensions.get("window");
 
 // 模拟一个数据
 const data = [1, 2];
-
+const videoHeight = 841.2;
 const VideoList = ({ setVideoInfo, commentsNum }) => {
   const [current, setCurrent] = useState(0);
   const [videos, setVideos] = useState([]);
@@ -49,12 +49,14 @@ const VideoList = ({ setVideoInfo, commentsNum }) => {
       pagingEnabled={true}
       data={videos}
       onMomentumScrollEnd={(e) => {
-        let index = Math.floor((e.nativeEvent.contentOffset.y + 2.0) / height);
+        let index = Math.floor(
+          (e.nativeEvent.contentOffset.y + 3) / videoHeight
+        );
         setVideoInfo(videos[index]);
         setCurrent(index);
       }}
       renderItem={({ item, index }) => (
-        <View style={{ height: height, top: 16 }}>
+        <View style={{ height: videoHeight, top: 16 }}>
           <VideoPlay
             paused={index !== current}
             videoItem={item}
